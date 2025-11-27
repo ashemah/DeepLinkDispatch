@@ -16,6 +16,15 @@ publishing {
                 password = findProperty("ARTIFACTORY_PASSWORD")
             }
         }
+
+        maven {
+            name = 'Nexus'
+            url = findProperty("nexusSnapshotURL")
+            credentials {
+                username = findProperty("nexusBuildUserToken")
+                password = findProperty("nexusBuildPassToken")
+            }
+        }
     }
 }
 
