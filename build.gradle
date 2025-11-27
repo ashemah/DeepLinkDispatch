@@ -8,7 +8,6 @@ buildscript {
         google()
         mavenCentral()
         gradlePluginPortal()
-        maven { url "https://oss.sonatype.org/service/local/repositories/snapshots/content/" }
     }
     dependencies {
         classpath deps.androidPlugin
