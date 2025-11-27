@@ -275,10 +275,9 @@ class DeepLinkProcessor(
             prefixesMap = prefixes,
         ) + (
             element
-                .getAnnotation(DEEP_LINK_CLASS)
-                ?.value
-                ?.value
-                ?.toList() ?: emptyList()
+                .getAllAnnotations()
+                .firstOrNull { it.qualifiedName == DEEP_LINK_CLASS.qualifiedName }
+                ?.getAsList<String>("value") ?: emptyList()
         )
 
     private fun verifyCass(classElement: XTypeElement) {
@@ -376,8 +375,10 @@ class DeepLinkProcessor(
         val templateHostPathSchemePlaceholders = deepLinkUriTemplate.schemeHostPathPlaceholders
         val annotatedPathParameterNames =
             allPathParameters
-                .mapNotNull {
-                    it.getAnnotation(DeeplinkParam::class)?.value?.name
+                .mapNotNull { param: XExecutableParameterElement ->
+                    param.getAllAnnotations()
+                        .firstOrNull { annotation: XAnnotation -> annotation.qualifiedName == DeeplinkParam::class.qualifiedName }
+                        ?.getAsString("name")
                 }.toSet()
         val annotatedPathParametersThatAreNotInUrlTemplate =
             annotatedPathParameterNames.filter { !templateHostPathSchemePlaceholders.contains(it) }
@@ -438,8 +439,9 @@ class DeepLinkProcessor(
                 }
                 val prefix: Array<String> =
                     customAnnotationTypeElement
-                        .getAnnotation(DEEP_LINK_SPEC_CLASS)
-                        ?.let { it.value.prefix } ?: emptyArray()
+                        .getAllAnnotations()
+                        .firstOrNull { it.qualifiedName == DEEP_LINK_SPEC_CLASS.qualifiedName }
+                        ?.getAsStringList("prefix")?.toTypedArray() ?: emptyArray()
                 if (prefix.hasEmptyOrNullString()) {
                     logError(
                         element = customAnnotationTypeElement,
@@ -498,10 +500,11 @@ class DeepLinkProcessor(
         }
         deeplinkHandlerAnnotatedElements.forEach { deepLinkHandlerElement ->
             val deepLinkModuleElements =
-                deepLinkHandlerElement
-                    .getAnnotation(DeepLinkHandler::class)
+                deepLinkHandlerElement.getAllAnnotations()
+                    .firstOrNull { it.qualifiedName == DeepLinkHandler::class.qualifiedName }
                     ?.getAsTypeList("value")
                     ?.map { it.typeElement!! }
+
             if (deepLinkModuleElements != null) {
                 tryCatchFileWriting {
                     generateDeepLinkDelegate(
